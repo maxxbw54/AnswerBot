@@ -15,10 +15,10 @@ def split_into_sentence(text):
                     # e.g.
                     if i > 3 and text[i - 1].lower() == 'g' and text[i - 2].lower() == '.' and text[
                                 i - 3].lower() == 'e':
-                        do_nothing = None
+                        pass
                     # vs.
                     if i > 2 and text[i - 2].lower() == 'v' and text[i - 1].lower() == 's':
-                        do_nothing = None
+                        pass
                     else:
                         sentences.append(sent)
                         sent = ''
