@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
 from utils.file_util import write_pdf_file, write_file
-from pathutil import get_base_path
+from pathConfig import get_base_path
 
 
 # format : [id, title, final_similarity]

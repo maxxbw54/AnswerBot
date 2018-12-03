@@ -1,3 +1,5 @@
+import unicodedata
+
 # -*- coding: UTF-8 -*-
 ch_set = ['.', '?', '!']
 
@@ -14,7 +16,7 @@ def split_into_sentence(text):
                 if text[i + 1] == ' ':
                     # e.g.
                     if i > 3 and text[i - 1].lower() == 'g' and text[i - 2].lower() == '.' and text[
-                                i - 3].lower() == 'e':
+                        i - 3].lower() == 'e':
                         pass
                     # vs.
                     if i > 2 and text[i - 2].lower() == 'v' and text[i - 1].lower() == 's':
@@ -35,6 +37,7 @@ def split_into_sentence(text):
 
 
 def split_into_paragraph(text):
+    # extract <p>sent</p>
     paragraph_list = []
     tag_head = '<p>'
     tag_tail = '</p>'
@@ -49,6 +52,11 @@ def split_into_paragraph(text):
         if tag_content != '':
             paragraph_list.append(tag_content)
     return paragraph_list
+
+
+def unicode2str(text):
+    if isinstance(text, unicode):
+        return unicodedata.normalize('NFKD', text).encode('ascii', 'ignore')
 
 
 if __name__ == '__main__':

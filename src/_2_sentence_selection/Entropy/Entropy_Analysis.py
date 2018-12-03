@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 from utils.data_util import replace_double_space
 from utils.Stemming import stemming_for_word_list
-from utils.remove_StopWords import remove_stopwords
+from utils.StopWords import remove_stopwords
 from build_tf_idf_dic import remove_duplicate_element
 from build_tf_idf_dic import read_voc
 

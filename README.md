@@ -1,24 +1,93 @@
 # answerbot-tool
 
-## tables
-a. **posts**
 
-Imported from SO data dump.
+## Required Database
+```odpsql
+drop database if exists `answerbot`;
+CREATE DATABASE IF NOT EXISTS `answerbot` DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+```
 
-b. **java**
+## Required tables
+### postlink
 
-Select all posts tagged as Java in posts.
+1. Create table
+```odpsql
+use answerbot;
+CREATE TABLE post_links (
+    Id INT NOT NULL PRIMARY KEY,  
+    CreationDate DATETIME,
+    PostId INT,
+	RelatedPostId INT,
+	LinkTypeId INT
+);
 
-c. **repo**
+load xml local infile '/data/bowen/Post2Vec/data/sources/SO-05-Sep-2018/PostLinks.xml'
+into table post_links
+rows identified by '<row>';
+```
 
-Preprocess all the posts in java
-If one post is a question, then, .
-If one post is an answer, then, . 
+### java_qs
 
-Attributes,
-1. Id.
-2. PostTypeId. (1 = Question, 2 = Answer)
-3. Title (ONLY for question)
-4. Title-clean (ONLY for question. Stop words removal and stemming)
-5. Body
-6. Body-clean (clean html, )
+1. Create table
+```odpsql
+CREATE TABLE java_qs (
+    Id INT NOT NULL PRIMARY KEY,
+    PostTypeId SMALLINT,
+    AcceptedAnswerId INT,
+	CreationDate DATETIME,
+	Score INT NULL,
+	ViewCount INT NULL,
+	Body text NULL,
+	OwnerUserId INT,
+	LastEditorUserId INT,
+	LastEditDate DATETIME,
+	LastActivityDate DATETIME,
+	Title varchar(256),
+	Tags VARCHAR(256),
+	AnswerCount INT,
+	CommentCount INT,
+	FavoriteCount INT,
+	CommunityOwnedDate DATETIME,
+    ParentId INT       
+);
+
+# index
+create index java_qs_idx on java_qs(Id);
+```
+
+2. Insert data
+```odpsql
+INSERT INTO answerbot.java_qs SELECT * FROM `05-Sep-2018-SO`.posts WHERE Tags LIKE '%<java>%' AND AnswerCount > 0 AND PostTypeId = 1;
+```
+
+### java_ans
+```odpsql
+CREATE TABLE java_ans (
+    Id INT NOT NULL PRIMARY KEY,
+    PostTypeId SMALLINT,
+    AcceptedAnswerId INT,
+	CreationDate DATETIME,
+	Score INT NULL,
+	ViewCount INT NULL,
+	Body text NULL,
+	OwnerUserId INT,
+	LastEditorUserId INT,
+	LastEditDate DATETIME,
+	LastActivityDate DATETIME,
+	Title varchar(256),
+	Tags VARCHAR(256),
+	AnswerCount INT,
+	CommentCount INT,
+	FavoriteCount INT,
+	CommunityOwnedDate DATETIME,
+    ParentId INT       
+);
+
+# index
+create index java_ans_idx on java_ans(Id);
+```
+
+2. Insert data
+```odpsql
+INSERT INTO answerbot.java_ans select * from `05-Sep-2018-SO`.posts where PostTypeId = 2 AND ParentId in (select Id from `05-Sep-2018-SO`.posts where Tags like '%<java>%' and PostTypeId = 1);
+```

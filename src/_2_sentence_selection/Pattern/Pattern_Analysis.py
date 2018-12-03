@@ -3,7 +3,7 @@
 
 def get_pattern_score(text):
     Pattern = ['please check', 'pls check', 'you should', 'you can try', 'you could try', 'check out',
-               'in short', 'the most important is', 'I\'d recommend', 'in summary', 'keep in mind that',
+               'in short', 'the most important is', 'I d recommend', 'in summary', 'keep in mind that',
                'i suggest that']
     for pattern in Pattern:
         if pattern in text.lower():

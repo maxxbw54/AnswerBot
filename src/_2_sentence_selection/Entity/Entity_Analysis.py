@@ -1,12 +1,5 @@
 # -*- coding: UTF-8 -*-
-
-
-def load_entity_dic():
-    dic = []
-    for line in open(path_of_dic):
-        line = line.strip()
-        dic.append(line)
-    return dic
+from _1_question_retrieval.Entity.entity_util import load_entity_dic
 
 
 def get_entity_score(query_entities, paragraph):
@@ -14,12 +7,14 @@ def get_entity_score(query_entities, paragraph):
     total_num = len(query_entities)
     include_num = 0.0
     if total_num == 0:
-        return 0
+        return 1.5
     for query_entity in query_entities:
         if query_entity in paragraph:
             include_num += 1.0
     return 1.0 + (include_num / total_num)
 
+
+# (sentence text include entities)
 
 def get_entities_from_text(text):
     entity_dic = load_entity_dic()

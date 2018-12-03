@@ -1,18 +1,17 @@
 # -*- coding: UTF-8 -*-
 
-import MySQLdb as mdb
-from data_structure.SO_QuestionUnit import SO_QuestionUnit
-from data_structure.SO_AnswerUnit import SO_AnswerUnit
-from data_util import preprocessing_for_SO_QuestionUnit, preprocessing_for_SO_AnswerUnit
-from utils.remove_StopWords import remove_stopwords
-from utils.Stemming import stemming_for_word_list
+import pymysql as mdb
+from data_structure.SO_que import SO_Que
+from data_structure.SO_ans import SO_Ans
+from data_util import preprocessing_for_que, preprocessing_for_ans
+from utils.time_utils import get_current_time
 
 
 # java
 def read_questions_from_java(num):
-    sql = 'SELECT * FROM GeneralAnswer.java WHERE PostTypeId=1 limit 0,' + str(num)
+    sql = 'SELECT * FROM answerbot.java WHERE PostTypeId=1 limit 0,' + str(num)
     SO_datalist = []
-    con = mdb.connect('localhost', 'root', '123456', 'GeneralAnswer')
+    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
     try:
         cur.execute(sql)
@@ -21,9 +20,9 @@ def read_questions_from_java(num):
         for row in results:
             count += 1
             # id,type,title,tag
-            SO_QuestionUnit_tmp = SO_QuestionUnit(row[0], row[1], row[11], '', '', row[12])
-            SO_QuestionUnit_tmp = preprocessing_for_SO_QuestionUnit(SO_QuestionUnit_tmp)
-            SO_datalist.append(SO_QuestionUnit_tmp)
+            q_tmp = SO_Que(row[0], row[1], row[11], ' ', '', row[12])
+            q_tmp = preprocessing_for_que(q_tmp)
+            SO_datalist.append(q_tmp)
     except Exception as e:
         print e
     cur.close()
@@ -33,9 +32,9 @@ def read_questions_from_java(num):
 
 # repo
 def read_questions_from_repo(num):
-    sql = 'SELECT * FROM GeneralAnswer.repo WHERE PostTypeId=1 limit 0,' + str(num)
+    sql = 'SELECT * FROM answerbot.repo WHERE PostTypeId=1 limit 0,' + str(num)
     SO_datalist = []
-    con = mdb.connect('localhost', 'root', '123456', 'GeneralAnswer')
+    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
     try:
         cur.execute(sql)
@@ -44,8 +43,8 @@ def read_questions_from_repo(num):
         for row in results:
             count += 1
             # id,type,title,title_NO_SW,title_NO_SW_Stem,tag
-            SO_QuestionUnit_tmp = SO_QuestionUnit(row[0], row[1], row[2], row[3], row[4], row[5])
-            SO_datalist.append(SO_QuestionUnit_tmp)
+            q_tmp = SO_Que(row[0], row[1], row[2], row[3], row[4], row[5])
+            SO_datalist.append(q_tmp)
     except Exception as e:
         print e
     cur.close()
@@ -56,7 +55,7 @@ def read_questions_from_repo(num):
 def read_all_questions_from_post():
     sql = 'SELECT * FROM posts where Tags like \'%<java>%\' and AnswerCount > 0'
     SO_datalist = []
-    con = mdb.connect('localhost', 'root', '123456', 'GeneralAnswer')
+    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
     try:
         cur.execute(sql)
@@ -65,8 +64,8 @@ def read_all_questions_from_post():
         for row in results:
             count += 1
             # id,type,title,title_NO_SW,title_NO_SW_Stem,tag
-            SO_QuestionUnit_tmp = SO_QuestionUnit(row[0], row[1], row[2], row[3], row[4], row[5])
-            SO_datalist.append(SO_QuestionUnit_tmp)
+            q_tmp = SO_Que(row[0], row[1], row[2], row[3], row[4], row[5])
+            SO_datalist.append(q_tmp)
     except Exception as e:
         print e
     cur.close()
@@ -78,7 +77,7 @@ def read_all_questions_from_post():
 def read_all_questions_from_repo():
     sql = 'SELECT * FROM repo'
     SO_datalist = []
-    con = mdb.connect('localhost', 'root', '123456', 'GeneralAnswer')
+    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
     try:
         cur.execute(sql)
@@ -86,9 +85,9 @@ def read_all_questions_from_repo():
         count = 0
         for row in results:
             count += 1
-            # id,type,title,title_NO_SW,title_NO_SW_Stem,tag
-            SO_QuestionUnit_tmp = SO_QuestionUnit(row[0], row[1], row[2], row[3], row[4], row[5])
-            SO_datalist.append(SO_QuestionUnit_tmp)
+            # id,title,body,tag
+            q_tmp = SO_Que(row[0], row[1], row[2], row[3])
+            SO_datalist.append(q_tmp)
     except Exception as e:
         print e
     cur.close()
@@ -97,7 +96,7 @@ def read_all_questions_from_repo():
 
 
 def read_specific_question_from_repo(id):
-    con = mdb.connect('localhost', 'root', '123456', 'GeneralAnswer')
+    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
     sql = "SELECT * FROM repo WHERE Id=" + str(id)
     try:
@@ -105,15 +104,16 @@ def read_specific_question_from_repo(id):
         results = cur.fetchall()
         for row in results:
             # id,type,title,title_NO_SW,title_NO_SW_Stem,tag
-            SO_QuestionUnit_tmp = SO_QuestionUnit(row[0], row[1], row[2], row[3], row[4], row[5])
+            q_tmp = SO_Que(row[0], row[1], row[2], row[3], row[4], row[5])
     except Exception as e:
         print e
     cur.close()
     con.close()
-    return SO_QuestionUnit_tmp
+    return q_tmp
+
 
 def read_specific_question_from_post(id):
-    con = mdb.connect('localhost', 'root', '123456', 'GeneralAnswer')
+    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
     sql = "SELECT * FROM posts WHERE Id=" + str(id)
     try:
@@ -121,16 +121,16 @@ def read_specific_question_from_post(id):
         results = cur.fetchall()
         for row in results:
             # id,type,title,title_NO_SW,title_NO_SW_Stem,tag
-            SO_QuestionUnit_tmp = SO_QuestionUnit(row[0], row[1], row[2], row[3], row[4], row[5])
+            q_tmp = SO_Que(row[0], row[1], row[2], row[3], row[4], row[5])
     except Exception as e:
         print e
     cur.close()
     con.close()
-    return SO_QuestionUnit_tmp
+    return q_tmp
 
 
 def read_specific_question_from_post(id):
-    con = mdb.connect('localhost', 'root', '123456', 'GeneralAnswer')
+    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
     sql = "SELECT * FROM posts WHERE Id=" + str(id)
     try:
@@ -138,19 +138,19 @@ def read_specific_question_from_post(id):
         results = cur.fetchall()
         for row in results:
             # id,type,title,tag
-            SO_QuestionUnit_tmp = SO_QuestionUnit(row[0], row[1], row[11], '', '', row[12])
-            SO_QuestionUnit_tmp = preprocessing_for_SO_QuestionUnit(SO_QuestionUnit_tmp)
+            q_tmp = SO_Que(row[0], row[1], row[11], row[12])
+            q_tmp = preprocessing_for_que(q_tmp)
     except Exception as e:
         print e
     cur.close()
     con.close()
-    return SO_QuestionUnit_tmp
+    return q_tmp
 
 
 def read_duplicate_pair_from_postlink_table(num):
     Duplicate_pair = []
     postlink_sql = "SELECT * FROM post_links ORDER BY PostId"
-    con = mdb.connect('localhost', 'root', '123456', 'GeneralAnswer')
+    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
     try:
         cur.execute(postlink_sql)
@@ -168,10 +168,6 @@ def read_duplicate_pair_from_postlink_table(num):
             if count >= num:
                 break
             count += 1
-            # total size : 236616 (java)
-            # size = len(results)
-            # 160000 as train
-            # 40000 as test
     except Exception as e:
         print e
     cur.close()
@@ -180,7 +176,7 @@ def read_duplicate_pair_from_postlink_table(num):
 
 
 def ifjava_post(id):
-    con = mdb.connect('localhost', 'root', '123456', 'GeneralAnswer')
+    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
     sql = "SELECT * FROM posts WHERE Id=" + str(id) + " and Tags like '%<java>%'"
     ifjava = False
@@ -199,15 +195,15 @@ def ifjava_post(id):
 def read_correspond_answer_from_java_table(q_id):
     corr_answer = []
     sql = "SELECT * FROM java WHERE PostTypeId = 2 AND ParentId = " + str(q_id)
-    con = mdb.connect('localhost', 'root', '123456', 'GeneralAnswer')
+    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
     try:
         cur.execute(sql)
         results = cur.fetchall()
         for row in results:
             # id, type, score, desc
-            SO_AnswerUnit_tmp = SO_AnswerUnit(row[0], row[1], row[4], row[6])
-            SO_AnswerUnit_tmp = preprocessing_for_SO_AnswerUnit(SO_AnswerUnit_tmp)
+            SO_AnswerUnit_tmp = SO_Ans(row[0], row[1], row[4], row[6])
+            SO_AnswerUnit_tmp = preprocessing_for_ans(SO_AnswerUnit_tmp)
             corr_answer.append(SO_AnswerUnit_tmp)
     except Exception as e:
         print e
@@ -216,93 +212,83 @@ def read_correspond_answer_from_java_table(q_id):
     return corr_answer
 
 
-def read_java_pair_from_postlink():
-    sql = "SELECT * FROM post_links"
-    con = mdb.connect('localhost', 'root', '123456', 'GeneralAnswer')
+def read_q_list_from_java(id_list):
+    qlist = []
+    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
-    post_pair = []
-    post_list = []
-    count = 0
-    try:
-        cur.execute(sql)
-        results = cur.fetchall()
-        for row in results:
-            if count % 10000 == 0:
-                print 'count : ' + str(count)
+    count = 1
+    for qid in id_list:
+        sql = "SELECT * FROM java_qs WHERE Id = %s" % qid[0]
+        try:
+            cur.execute(sql)
+            results = cur.fetchall()
+            row = results[0]
+            # id,title,body,tags
+            qlist.append(SO_Que(row[0], row[11], row[6], row[12]))
             count += 1
-            postId = row[2]
-            related_postId = row[3]
-            linktypeId = row[4]
-            if ifjava_post(postId) and ifjava_post(related_postId):
-                post_pair.append([postId, related_postId, linktypeId])
-                if postId not in post_list:
-                    post_list.append(postId)
-                if related_postId not in post_list:
-                    post_list.append(related_postId)
-    except Exception as e:
-        print e
+            if count % 1000 == 0:
+                print 'reading ' + str(count) + ' question from Table java_qs'
+        except Exception as e:
+            print e
     cur.close()
     con.close()
-    return post_pair, post_list
+    return qlist
 
 
-def read_id_list_from_java(id_list):
-    SO_QuestionUnit_list = []
-    con = mdb.connect('localhost', 'root', '123456', 'GeneralAnswer')
+def read_id_list(tablename):
+    id_list = []
+    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
     count = 1
     for id in id_list:
         if count % 10000 == 0:
             print 'reading ' + str(count) + ' question from Table java'
         count += 1
-        sql = "SELECT * FROM java WHERE Id=" + str(id) + ";"
+        sql = "SELECT Id FROM %s" % tablename
         try:
             cur.execute(sql)
             results = cur.fetchall()
             for row in results:
                 # id,type,title,tag
-                SO_QuestionUnit_tmp = SO_QuestionUnit(row[0], row[1], row[11], '', '', row[12])
-                SO_QuestionUnit_tmp = preprocessing_for_SO_QuestionUnit(SO_QuestionUnit_tmp)
-                SO_QuestionUnit_list.append(SO_QuestionUnit_tmp)
+                id_list.append(row[0])
         except Exception as e:
             print e
     cur.close()
     con.close()
-    return SO_QuestionUnit_list
+    return id_list
 
 
 # repo
-def insert_SO_QuestionUnit_List_to_repo(SO_QuestionUnit_list, stopwords):
-    con = mdb.connect('localhost', 'root', '123456', 'GeneralAnswer')
+def insert_qlist_to_table(qlist, tablename):
+    print "start to insert...", get_current_time()
+    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
     count = 1
-    for SO_QuestionUnit in SO_QuestionUnit_list:
-        title_without_stopwords = remove_stopwords(SO_QuestionUnit.title.split(' '), stopwords)
-        str_title_without_stopwords = " ".join(str(x) for x in title_without_stopwords)
-        title_without_stopwords_stemming = stemming_for_word_list(title_without_stopwords)
-        str_title_without_stopwords_stemming = " ".join(str(x) for x in title_without_stopwords_stemming)
-        if count % 10000 == 0:
-            print 'inserting ' + str(count) + ' question to Table repo'
-        count += 1
-        # id,type,title,desc,tag
-        sql = 'INSERT INTO repo VALUES(\'' + str(SO_QuestionUnit.id) + '\',\'' + str(
-            SO_QuestionUnit.type) + '\',\'' + str(SO_QuestionUnit.title) + '\',\'' + str(
-            str_title_without_stopwords) + '\',\'' + str(str_title_without_stopwords_stemming) + '\',\'' + str(
-            SO_QuestionUnit.tag) + '\')'
+    for q in qlist:
         try:
+            # id,title,body,tag
+            title = mdb.escape_string(q.title)
+            body = mdb.escape_string(q.body)
+            tag = mdb.escape_string(','.join(q.tag))
+            sql = "INSERT INTO %s VALUES('%s', '%s', '%s', '%s')" % (tablename, q.id, title, body, tag)
             cur.execute(sql)
             con.commit()
+            count += 1
+            if count % 1000 == 0:
+                print('Inserting ' + str(count) + ' question to Table %s' % tablename, get_current_time())
         except Exception as e:
+            print "id %s\ntitle %s\nbody %s\ntag %s\n" % (q.id, q.title, q.body, q.tag)
             print e
     cur.close()
     con.close()
-    print 'insert Done.'
+    print('Insert finished.', get_current_time())
+    return
 
 
 # repo
 def read_id_list_from_repo(id_list):
     SO_QuestionUnit_list = []
-    con = mdb.connect('localhost', 'root', '123456', 'GeneralAnswer')
+    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
     count = 1
     for id in id_list:
@@ -314,9 +300,8 @@ def read_id_list_from_repo(id_list):
             cur.execute(sql)
             results = cur.fetchall()
             for row in results:
-                # id,type,title,title_NO_SW,title_NO_SW_Stem,tag
-                SO_QuestionUnit_tmp = SO_QuestionUnit(row[0], row[1], row[2], row[3], row[4], row[5])
-                SO_QuestionUnit_list.append(SO_QuestionUnit_tmp)
+                q_tmp = SO_Que(row[0], row[1], row[2], row[3], row[4], row[5])
+                SO_QuestionUnit_list.append(q_tmp)
         except Exception as e:
             print e
     cur.close()
