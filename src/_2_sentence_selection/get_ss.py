@@ -14,7 +14,7 @@ from utils.StopWords import read_EN_stopwords, remove_stopwords
 import sys
 from utils.experiment_util import save_ss_result_our_approach
 from pathConfig import get_base_path
-from _3_summurization.MMR_Analysis import MMR_Analysis
+from _3_summarization.MMR_Analysis import MMR_Analysis
 from utils.experiment_util import load_Step1_result
 from utils.data_util import replace_double_space
 
