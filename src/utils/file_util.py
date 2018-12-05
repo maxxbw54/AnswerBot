@@ -1,9 +1,4 @@
 # -*- coding: UTF-8 -*-
-from reportlab.platypus import SimpleDocTemplate, Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.units import inch
-from reportlab.lib.pagesizes import letter
-import io
 import os
 import shutil
 
@@ -12,36 +7,6 @@ def write_file(filepath, strTmp):
     output = open(filepath, 'w')
     output.write(strTmp.strip())
     output.close()
-
-
-def write_pdf_file(path, sentlist):
-    buf = io.BytesIO()
-
-    # Setup the document with paper size and margins
-    doc = SimpleDocTemplate(
-        buf,
-        rightMargin=inch / 2,
-        leftMargin=inch / 2,
-        topMargin=inch / 2,
-        bottomMargin=inch / 2,
-        pagesize=letter,
-    )
-
-    # Styling paragraphs
-    styles = getSampleStyleSheet()
-    # Write things on the document
-    paragraphs = []
-    for sent in sentlist:
-        if sent.strip() == '':
-            sent = '------------------------------------------------'
-        try:
-            paragraphs.append(Paragraph(sent, styles['Normal']))
-        except Exception, e:
-            print sent
-    doc.build(paragraphs)
-    # Write the PDF to a file
-    with open(path, 'w') as fd:
-        fd.write(buf.getvalue())
 
 
 def read_IdList(path):

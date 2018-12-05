@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from data_structure.SO_que import SO_Que
-import MySQLdb as mdb
-from utils.data_util import preprocessing_for_que
+import pymysql as mdb
+from utils.preprocessing_util import preprocessing_for_que
 import sys
 
 reload(sys)

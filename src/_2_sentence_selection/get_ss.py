@@ -9,14 +9,9 @@ from _2_sentence_selection.Pattern.Pattern_Analysis import get_pattern_score
 from _2_sentence_selection.HTMLTag.HTML_Analysis import get_html_score
 from _2_sentence_selection.Entropy.Entropy_Analysis import get_entropy_score
 from _2_sentence_selection.Entity.Entity_Analysis import get_entity_score, get_entities_from_text
-from utils.data_util import preprocessing_for_general_text
 from utils.StopWords import read_EN_stopwords, remove_stopwords
 import sys
-from utils.experiment_util import save_ss_result_our_approach
-from pathConfig import get_base_path
-from _3_summarization.MMR_Analysis import MMR_Analysis
-from utils.experiment_util import load_Step1_result
-from utils.data_util import replace_double_space
+from utils.preprocessing_util import replace_double_space
 
 '''
 return format : [sent_Num, raw_sent, sent_without_tag, Order, Score, q_id]

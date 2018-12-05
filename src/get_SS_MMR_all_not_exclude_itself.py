@@ -4,7 +4,7 @@ from _3_summurization.MMR_Analysis import MMR_Analysis
 from _2_sentence_selection.get_SS_MMR_all import get_ss
 from utils.file_util import write_file
 import operator
-from utils.data_util import preprocessing_for_general_text
+from utils.preprocessing_util import preprocessing_for_general_text
 from _1_question_retrieval.Textual.textual_util import load_textual_word2vec_model, read_Textual_IDF_voc
 from _1_question_retrieval.Textual.textual_util import calc_wordembedding_similarity_by_textual
 import time

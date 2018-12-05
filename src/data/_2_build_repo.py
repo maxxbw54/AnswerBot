@@ -2,7 +2,7 @@
 
 from utils.db_util import read_q_list_from_java, insert_qlist_to_table
 import pandas as pd
-from utils.data_util import preprocessing_for_que
+from utils.preprocessing_util import preprocessing_for_que
 from utils.time_utils import get_current_time
 import sys
 

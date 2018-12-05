@@ -1,34 +1,10 @@
 # -*- coding: UTF-8 -*-
 
-import MySQLdb as mdb
+import pymysql as mdb
 from data_structure.SO_que import SO_Que
 from data_structure.SO_ans import SO_Ans
-from data_util import preprocessing_for_que, preprocessing_for_ans
+from preprocessing_util import preprocessing_for_que, preprocessing_for_ans
 from utils.time_utils import get_current_time
-
-
-# java
-def read_questions_from_java(num):
-    sql = 'SELECT * FROM answerbot.java WHERE PostTypeId=1 limit 0,' + str(num)
-    SO_datalist = []
-    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
-    cur = con.cursor()
-    try:
-        cur.execute(sql)
-        results = cur.fetchall()
-        count = 0
-        for row in results:
-            count += 1
-            # id,type,title,tag
-            q_tmp = SO_Que(row[0], row[1], row[11], ' ', '', row[12])
-            q_tmp = preprocessing_for_que(q_tmp)
-            SO_datalist.append(q_tmp)
-    except Exception as e:
-        print e
-    cur.close()
-    con.close()
-    return SO_datalist
-
 
 # repo
 def read_questions_from_repo(num):
@@ -75,7 +51,7 @@ def read_all_questions_from_post():
 
 # repo
 def read_all_questions_from_repo():
-    sql = 'SELECT * FROM repo'
+    sql = 'SELECT * FROM repo_qs'
     SO_datalist = []
     con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
@@ -99,32 +75,29 @@ def read_specific_question_from_repo(id):
     con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
     sql = "SELECT * FROM repo_qs WHERE Id=" + str(id)
-    SO_datalist = []
     try:
         cur.execute(sql)
         results = cur.fetchall()
         for row in results:
-            # id,type,title,title_NO_SW,title_NO_SW_Stem,tag
+            # id,title,body,tag
             q_tmp = SO_Que(row[0], row[1], row[2], row[3])
-            SO_datalist.append(q_tmp)
     except Exception as e:
         print e
     cur.close()
     con.close()
-    return SO_datalist
+    return q_tmp
 
 
 def read_specific_question_from_post(id):
     con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
-
     sql = "SELECT * FROM posts WHERE Id=" + str(id)
     try:
         cur.execute(sql)
         results = cur.fetchall()
         for row in results:
-            # id,type,title,title_NO_SW,title_NO_SW_Stem,tag
-            q_tmp = SO_Que(row[0], row[1], row[2], row[3], row[4], row[5])
+            # id,title,body,tag
+            q_tmp = SO_Que()
     except Exception as e:
         print e
     cur.close()
@@ -286,27 +259,3 @@ def insert_qlist_to_table(qlist, tablename):
     con.close()
     print('Insert finished.', get_current_time())
     return
-
-
-# repo
-def read_id_list_from_repo(id_list):
-    SO_QuestionUnit_list = []
-    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
-    cur = con.cursor()
-    count = 1
-    for id in id_list:
-        if count % 10000 == 0:
-            print 'reading ' + str(count) + ' question from Table repo'
-        count += 1
-        sql = "SELECT * FROM repo WHERE Id=" + str(id)
-        try:
-            cur.execute(sql)
-            results = cur.fetchall()
-            for row in results:
-                q_tmp = SO_Que(row[0], row[1], row[2], row[3], row[4], row[5])
-                SO_QuestionUnit_list.append(q_tmp)
-        except Exception as e:
-            print e
-    cur.close()
-    con.close()
-    return SO_QuestionUnit_list
