@@ -80,7 +80,8 @@ def clean_html_tags2(raw_html):
 
 
 def tokenize_and_rebuild(sent):
-    sent = unicode(sent, 'utf-8')
+    #sent = unicode(sent, 'utf-8')
+    sent = unicode(sent, 'utf-8', errors='ignore')
     ws = word_tokenize(sent)
     return unicode2str(' '.join(ws))
 

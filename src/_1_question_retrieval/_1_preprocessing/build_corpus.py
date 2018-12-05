@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from data_structure.SO_que import SO_Que
-import pymysql as mdb
+import MySQLdb as mdb
 from utils.data_util import preprocessing_for_que
 import sys
 

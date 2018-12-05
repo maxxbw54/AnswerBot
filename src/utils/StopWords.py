@@ -14,7 +14,7 @@ def read_EN_stopwords():
 
 
 def remove_stopwords(sent, sw):
-    wlist = tokenize(sent)
+    wlist = sent
     new_sent = ''
     for w in wlist:
         if w == '':

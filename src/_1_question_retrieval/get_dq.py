@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import operator
-from _1_question_retrieval.utils import load_w2v_model, load_idf_voccab
+from _1_question_retrieval.utils1 import load_w2v_model, load_idf_voccab
 import time
 from utils.StopWords import remove_stopwords, read_EN_stopwords
 from utils.db_util import read_all_questions_from_repo, read_specific_question_from_repo
@@ -56,8 +56,11 @@ def calc_similarity(query_word, title_NO_SW, size_of_repo, textual_IDF_voc, word
             sim_up += maxsim * idf
             sim_down += idf
     # (include_num / len_doc) to differ 'code review tool' and 'use code review tool'
-    sim = sim_up / sim_down
-    return sim
+    if sim_down == 0:
+        return 0
+    else :
+        sim = sim_up / sim_down
+        return sim
 
 
 def get_dq(query_w, topnum, repo):
