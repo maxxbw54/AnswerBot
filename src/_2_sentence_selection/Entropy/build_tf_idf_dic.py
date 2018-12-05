@@ -1,4 +1,4 @@
-from utils.data_util import replace_double_space
+from utils.preprocessing_util import replace_double_space
 from utils.Stemming import stemming_for_word_list
 import math
 from utils.file_util import write_file

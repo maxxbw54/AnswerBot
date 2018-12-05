@@ -1,4 +1,4 @@
-from _3_summurization.MMR_Analysis import MMR_Analysis
+from _3_summarization.MMR_Analysis import MMR_Analysis
 import operator
 
 

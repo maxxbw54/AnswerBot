@@ -2,7 +2,7 @@
 
 from data_structure.SO_que import SO_Que
 import pymysql as mdb
-from utils.data_util import preprocessing_for_que
+from utils.preprocessing_util import preprocessing_for_que
 import sys
 
 reload(sys)

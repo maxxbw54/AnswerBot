@@ -5,9 +5,9 @@ import sys
 import copy
 import math
 import numpy as np
-from _1_question_retrieval.Textual.textual_util import load_textual_word2vec_model, read_Textual_IDF_voc
+from utils.data_util import load_idf_vocab, load_w2v_model
 from utils.StopWords import remove_stopwords
-from utils.data_util import replace_double_space
+from utils.preprocessing_util import replace_double_space
 
 
 def calc_wordvec_similarity(vec1, vec2):
@@ -87,9 +87,9 @@ def build_sim_matrix(query, top_ss):
     len_of_paragraph = len(top_ss_tmp)
     sim_matrix = [[0 for col in range(len_of_paragraph)] for row in range(len_of_paragraph)]
     # doc sim parameter
-    word_embedding_model = load_textual_word2vec_model()
+    word_embedding_model = load_w2v_model()
     stopwords = read_EN_stopwords()
-    textual_IDF_voc = read_Textual_IDF_voc()
+    textual_IDF_voc = load_idf_vocab()
     for i in range(0, len_of_paragraph, 1):
         text_i_wordlist = replace_double_space(top_ss_tmp[i][2].replace('.', ' ').replace('/', ' ')).split(' ')
         text_i_wordlist = remove_stopwords(text_i_wordlist, stopwords)

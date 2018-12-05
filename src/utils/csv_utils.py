@@ -47,7 +47,7 @@ def write_list_to_csv(list_tmp, csv_fpath, header):
         wr.writerow(header)
         for x in list_tmp:
             try:
-                wr.writerow([x])
+                wr.writerow(x)
             except Exception as e:
                 print("Error %s" % e)
     print("Write %s successfully!" % csv_fpath)
