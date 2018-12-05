@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-import pymysql as mdb
+import MySQLdb as mdb
 from data_structure.SO_que import SO_Que
 from data_structure.SO_ans import SO_Ans
 from data_util import preprocessing_for_que, preprocessing_for_ans
@@ -98,23 +98,26 @@ def read_all_questions_from_repo():
 def read_specific_question_from_repo(id):
     con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
-    sql = "SELECT * FROM repo WHERE Id=" + str(id)
+    sql = "SELECT * FROM repo_qs WHERE Id=" + str(id)
+    SO_datalist = []
     try:
         cur.execute(sql)
         results = cur.fetchall()
         for row in results:
             # id,type,title,title_NO_SW,title_NO_SW_Stem,tag
-            q_tmp = SO_Que(row[0], row[1], row[2], row[3], row[4], row[5])
+            q_tmp = SO_Que(row[0], row[1], row[2], row[3])
+            SO_datalist.append(q_tmp)
     except Exception as e:
         print e
     cur.close()
     con.close()
-    return q_tmp
+    return SO_datalist
 
 
 def read_specific_question_from_post(id):
     con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
+
     sql = "SELECT * FROM posts WHERE Id=" + str(id)
     try:
         cur.execute(sql)

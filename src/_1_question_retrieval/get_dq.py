@@ -85,9 +85,9 @@ def get_dq(query_w, topnum, repo):
         sim = rank[i][1]
         ranklist.append(id)
         if i < topnum:
-            q = read_specific_question_from_repo(id)
-            top_dq.append([q, sim])
-    return top_dq, ranklist
+            title = read_specific_question_from_repo(id)[0].title
+            top_dq.append([id, title, sim])
+    return top_dq
 
 
 # settings
@@ -106,7 +106,8 @@ query = ""
 query_word = preprocessing_for_query(query)
 top_dq = get_dq(query_word, topnum, repo)
 for i in range(len(top_dq)):
-    q = top_dq[i][0]
-    sim = top_dq[i][1]
-    print "#%s\nId : %s\nTitle : %s\nSimilarity : %s\n" % (i, q.id, q.title, sim)
+    qs_id = top_dq[i][0]
+    title = top_dq[i][1]
+    sim = top_dq[i][2]
+    print "#%s\nId : %s\nTitle : %s\nSimilarity : %s\n" % (i, qs_id, title, sim)
 print 'Done.'
