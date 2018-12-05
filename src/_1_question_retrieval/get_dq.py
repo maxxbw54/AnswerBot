@@ -78,16 +78,16 @@ def get_dq(query_w, topnum, repo):
     # format: [id,sim]
     rank.sort(key=operator.itemgetter(1), reverse=True)
     # top_dq,rank
-    rank = []
+    ranklist = []
     top_dq = []
     for i in range(0, len(rank), 1):
         id = rank[i][0]
         sim = rank[i][1]
-        rank.append(id)
+        ranklist.append(id)
         if i < topnum:
             q = read_specific_question_from_repo(id)
             top_dq.append([q, sim])
-    return top_dq, rank
+    return top_dq, ranklist
 
 
 # settings
