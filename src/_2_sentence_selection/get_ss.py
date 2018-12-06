@@ -169,5 +169,5 @@ if __name__ == '__main__':
 
     #  get Step.1 result [query, top_dq]
     for query, top_dq_id in load_qs_result():
-        top_ss = get_ss(query, top_relevant_paragraph_num + 5, top_dq)
+        top_ss = get_ss(query, top_relevant_paragraph_num + 5, top_dq_id)
     print 'Done. ', time.strftime('%Y-%m-%d %H:%M:%S')
