@@ -42,9 +42,6 @@ def build_IDF_vocabulary():
     return sorted_voc
 
 
-
-
-
 if __name__ == '__main__':
     fpath = 'idf_vocab.csv'
     header = ['word', 'idf']

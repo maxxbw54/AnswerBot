@@ -3,17 +3,12 @@ import operator
 import time
 from utils.StopWords import remove_stopwords, read_EN_stopwords
 from utils.db_util import read_all_questions_from_repo, read_specific_question_from_repo
-from nltk import word_tokenize
 import numpy as np
 from utils.data_util import load_idf_vocab, load_w2v_model
-
-
-def preprocessing_for_query(q):
-    # basic preprocessing for query
-    qw = word_tokenize(q.lower())
-    stopwords = read_EN_stopwords()
-    qw = remove_stopwords(qw, stopwords)
-    return qw
+from utils.csv_utils import write_list_to_csv
+from utils.data_util import preprocessing_for_query
+from pathConfig import res_dir
+import os
 
 
 def calc_wordvec_similarity(vec1, vec2):
@@ -73,7 +68,6 @@ def get_dq(query_w, topnum, repo):
         cnt += 1
         if cnt % 10000 == 0:
             print("Processed %s questions." % cnt)
-            break
 
     # format: [id,sim]
     rank.sort(key=operator.itemgetter(1), reverse=True)
@@ -103,11 +97,20 @@ repo = read_all_questions_from_repo()
 print 'load textual voc : ', time.strftime('%Y-%m-%d %H:%M:%S')
 idf_vocab = load_idf_vocab(idf_vocab_fpath)
 
-query = "Differences between HashMap and Hashtable?"
-query_word = preprocessing_for_query(query)
-top_dq = get_dq(query_word, topnum, repo)
-for i in range(len(top_dq)):
-    q = top_dq[i][0]
-    sim = top_dq[i][1]
-    print "#%s\nId : %s\nTitle : %s\nSimilarity : %s\n" % (i, q.id, q.title, sim)
-print 'Done.'
+query_list = ["Differences between HashMap and Hashtable?"]
+res = list()
+for query in query_list:
+    print("query : %s" % query)
+    query_word = preprocessing_for_query(query)
+    top_dq = get_dq(query_word, topnum, repo)
+    cur_res_dict = []
+    for i in range(len(top_dq)):
+        q = top_dq[i][0]
+        sim = top_dq[i][1]
+        print "#%s\nId : %s\nTitle : %s\nSimilarity : %s\n" % (i, q.id, q.title, sim)
+        cur_res_dict.append((q.id, round(sim, 2)))
+    res.append([query, cur_res_dict])
+
+res_fpath = os.path.join(res_dir, 'rq_res.csv')
+header = ["query", "rq_id_list"]
+write_list_to_csv(res, res_fpath, header)

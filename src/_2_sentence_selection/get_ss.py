@@ -12,13 +12,16 @@ from _2_sentence_selection.Entity.Entity_Analysis import get_entity_score, get_e
 from utils.StopWords import read_EN_stopwords, remove_stopwords
 import sys
 from utils.preprocessing_util import replace_double_space
+from pathConfig import res_dir
+import os
+from utils.data_util import preprocessing_for_query
 
 '''
 return format : [sent_Num, raw_sent, sent_without_tag, Order, Score, q_id]
 '''
 
 
-def get_ss(query, top_relevant_paragraph_num, top_dq):
+def get_ss(query, top_relevant_paragraph_num, top_dq_id_list):
     sent_list = []
     # Relevance
     max_Relevance = -sys.float_info.max
@@ -46,22 +49,13 @@ def get_ss(query, top_relevant_paragraph_num, top_dq):
     min_Score = sys.float_info.max
 
     # For Entropy calculation : preprocessing for query
-    stopwords = read_EN_stopwords()
-    query = query.replace('. ', ' ').replace('? ', ' ').replace('! ', ' ').lower()
-    len_of_query = len(query)
-    # delete last symbol
-    if query[len_of_query - 1] == '?' or query[len_of_query - 1] == '!' or query[
-        len_of_query - 1] == '.':
-        query = query[:-1]
-    query = preprocessing_for_general_text(query.lower())
-    query_words = query.split(' ')
-    query_words = remove_stopwords(query_words, stopwords)
+    query_words = preprocessing_for_query(query)
     # query entities
     query_entities = get_entities_from_text(query)
 
     # question-level
     sent_Num = 0
-    for [q_id, title, sim] in top_dq:
+    for [q_id, title, sim] in top_dq_id:
         answers = read_correspond_answer_from_java_table(q_id)
         # answer-level
         for answer_tmp in answers:
@@ -158,16 +152,27 @@ def get_ss(query, top_relevant_paragraph_num, top_dq):
             break
         relevant_paragraphs.append([sent_Num, raw_sent, sent_without_tag, Order, Score, q_id])
         count += 1
-    del Normalized_sent_list
     return relevant_paragraphs
+
+
+def load_qs_result(rq_fpath):
+    import pandas as pd
+    rq_res = []
+    df = pd.read_csv(rq_fpath)
+    for idx, row in df.iterrows():
+        rq_res.append([row[0], row[1]])
+    return rq_res
 
 
 if __name__ == '__main__':
     print 'start : ', time.strftime('%Y-%m-%d %H:%M:%S')
     # parameter
-    top_relevant_paragraph_num = 5
-
-    #  get Step.1 result [query, top_dq]
-    for query, top_dq_id in load_qs_result():
-        top_ss = get_ss(query, top_relevant_paragraph_num + 5, top_dq)
+    top_relevant_paragraph_num = 10
+    rq_res_fpath = os.path.join(res_dir, "rq_res.csv")
+    res = []
+    for query, top_dq_id in load_qs_result(rq_res_fpath):
+        top_ss = get_ss(query, top_relevant_paragraph_num, top_dq_id)
+        for i in range(len(top_ss)):
+            print("#%s\n%s\n\n" % (i, top_ss[i]))
+        res.append([query, top_ss])
     print 'Done. ', time.strftime('%Y-%m-%d %H:%M:%S')

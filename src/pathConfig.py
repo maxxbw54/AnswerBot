@@ -2,7 +2,8 @@
 
 import os
 
-db_name = ''
+project_dir = "/home/user/Desktop/bowen/answerbot-tool"
+res_dir = os.path.join(project_dir, "res")
 
 
 def get_base_path():
