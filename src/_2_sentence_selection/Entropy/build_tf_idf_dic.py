@@ -24,6 +24,7 @@ def read_voc():
 if __name__ == '__main__':
     reponum = 50000
     voc_str = ''
+    voc = read_voc()
     for key in voc.keys():
         voc_str += (key + '   ' + str(voc[key]) + '\n')
     write_file(path_of_voc, voc_str.strip())
