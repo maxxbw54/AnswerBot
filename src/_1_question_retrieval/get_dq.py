@@ -46,8 +46,8 @@ def calc_similarity(word_list_1, word_list_2, idf_voc, word2vector_model):
                 idf = idf_voc[w1]
                 sim_up += maxsim * idf
                 sim_down += idf
-            else:
-                print("%s not in idf vocabulary!" % w1)
+            # else:
+            # print("%s not in idf vocabulary!" % w1)
     if sim_down == 0:
         print("sim_down = 0!\n word sent 1 %s\nword sent 2 %s" % (word_list_1, word_list_2))
         return 0
@@ -83,34 +83,35 @@ def get_dq(query_w, topnum, repo):
     return top_dq
 
 
-# settings
-topnum = 10
-model_fpath = './_2_word2vec_model/model'
-idf_vocab_fpath = './_3_IDF_vocabulary/idf_vocab.csv'
+if __name__ == '__main__':
 
-# load word2vec model
-print 'load_textual_word2vec_model() : ', time.strftime('%Y-%m-%d %H:%M:%S')
-w2v_model = load_w2v_model(model_fpath)
-# load repo
-print 'load repo :', time.strftime('%Y-%m-%d %H:%M:%S')
-repo = read_all_questions_from_repo()
-print 'load textual voc : ', time.strftime('%Y-%m-%d %H:%M:%S')
-idf_vocab = load_idf_vocab(idf_vocab_fpath)
+    # settings
+    topnum = 10
+    idf_vocab_fpath = './_3_IDF_vocabulary/idf_vocab.csv'
 
-query_list = ["Differences between HashMap and Hashtable?"]
-res = list()
-for query in query_list:
-    print("query : %s" % query)
-    query_word = preprocessing_for_query(query)
-    top_dq = get_dq(query_word, topnum, repo)
-    cur_res_dict = []
-    for i in range(len(top_dq)):
-        q = top_dq[i][0]
-        sim = top_dq[i][1]
-        print "#%s\nId : %s\nTitle : %s\nSimilarity : %s\n" % (i, q.id, q.title, sim)
-        cur_res_dict.append((q.id, round(sim, 2)))
-    res.append([query, cur_res_dict])
+    # load word2vec model
+    print 'load_textual_word2vec_model() : ', time.strftime('%Y-%m-%d %H:%M:%S')
+    w2v_model = load_w2v_model()
+    # load repo
+    print 'load repo :', time.strftime('%Y-%m-%d %H:%M:%S')
+    repo = read_all_questions_from_repo()
+    print 'load textual voc : ', time.strftime('%Y-%m-%d %H:%M:%S')
+    idf_vocab = load_idf_vocab()
 
-res_fpath = os.path.join(res_dir, 'rq_res.csv')
-header = ["query", "rq_id_list"]
-write_list_to_csv(res, res_fpath, header)
+    query_list = ["Differences between HashMap and Hashtable?"]
+    res = list()
+    for query in query_list:
+        print("query : %s" % query)
+        query_word = preprocessing_for_query(query)
+        top_dq = get_dq(query_word, topnum, repo)
+        cur_res_dict = []
+        for i in range(len(top_dq)):
+            q = top_dq[i][0]
+            sim = top_dq[i][1]
+            print "#%s\nId : %s\nTitle : %s\nSimilarity : %s\n" % (i, q.id, q.title, sim)
+            cur_res_dict.append((q.id, round(sim, 2)))
+        res.append([query, cur_res_dict])
+
+    res_fpath = os.path.join(res_dir, 'rq_res.csv')
+    header = ["query", "rq_id_list"]
+    write_list_to_csv(res, res_fpath, header)

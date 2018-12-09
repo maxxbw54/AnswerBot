@@ -3,55 +3,10 @@
 from utils.StopWords import read_EN_stopwords
 import sys
 import copy
-import math
-import numpy as np
 from utils.data_util import load_idf_vocab, load_w2v_model
 from utils.StopWords import remove_stopwords
-from utils.preprocessing_util import replace_double_space
-
-
-def calc_wordvec_similarity(vec1, vec2):
-    vec1 = vec1.reshape(1, len(vec1))
-    vec2 = vec2.reshape(1, len(vec2))
-    x1_norm = np.sqrt(np.sum(vec1 ** 2, axis=1, keepdims=True))
-    x2_norm = np.sqrt(np.sum(vec2 ** 2, axis=1, keepdims=True))
-    prod = np.sum(vec1 * vec2, axis=1, keepdims=True)
-    cosine_sim = prod / (x1_norm * x2_norm)
-    return cosine_sim[0][0]
-
-
-def calc_similarity_by_wordembedding(wordlist1, wordlist2, textual_IDF_voc, word2vector_model):
-    size_of_repo = 228917
-    len_1 = len(wordlist1)
-    len_2 = len(wordlist2)
-    if len_1 == 0 or len_2 == 0:
-        return 0.0
-
-    sim_up = 0
-    sim_down = 0
-    for word_1 in wordlist1:
-        word_1_unicode = word_1.decode('utf-8')
-        # maxsim
-        maxsim = 0.0
-        if word_1_unicode in word2vector_model:
-            wordvec_1 = word2vector_model[word_1_unicode]
-            for word_2 in wordlist2:
-                # word similarity
-                word_2_unicode = word_2.decode('utf-8')
-                if word_2_unicode in word2vector_model:
-                    wordvec_2 = word2vector_model[word_2_unicode]
-                    sim_tmp = calc_wordvec_similarity(wordvec_1, wordvec_2)
-                    if sim_tmp > maxsim:
-                        maxsim = sim_tmp
-        # idf
-        idf = math.log(float(size_of_repo))
-        if word_1 in textual_IDF_voc:
-            idf = textual_IDF_voc[word_1]
-        sim_up += maxsim * idf
-        sim_down += idf
-    # (include_num / len_doc) to differ 'code review tool' and 'use code review tool'
-    sim = sim_up / sim_down
-    return sim
+from nltk import word_tokenize
+from _1_question_retrieval.get_dq import calc_similarity
 
 
 # top_ss format: [sent_Num, raw_sent, sent_without_tag, Order, Score, q_id]
@@ -83,30 +38,26 @@ top_ss format : [sent_Num, raw_sent, sent_without_tag, Order, Score, q_id]
 def build_sim_matrix(query, top_ss):
     # add query
     top_ss_tmp = copy.deepcopy(top_ss)
-    top_ss_tmp.append(['-1', query, query])
+    top_ss_tmp.append(query)
     len_of_paragraph = len(top_ss_tmp)
     sim_matrix = [[0 for col in range(len_of_paragraph)] for row in range(len_of_paragraph)]
     # doc sim parameter
-    word_embedding_model = load_w2v_model()
+    w2v_model = load_w2v_model()
     stopwords = read_EN_stopwords()
-    textual_IDF_voc = load_idf_vocab()
+    idf_voc = load_idf_vocab()
+
+    # tokenize
+    for i in range(len(top_ss_tmp)):
+        top_ss_tmp[i] = word_tokenize(top_ss_tmp[i])
+        top_ss_tmp[i] = remove_stopwords(top_ss_tmp[i], stopwords)
+
     for i in range(0, len_of_paragraph, 1):
-        text_i_wordlist = replace_double_space(top_ss_tmp[i][2].replace('.', ' ').replace('/', ' ')).split(' ')
-        text_i_wordlist = remove_stopwords(text_i_wordlist, stopwords)
         for j in range(0, i + 1, 1):
             if i == j:
                 sim_matrix[i][j] = 1.0
-            elif i == (len_of_paragraph - 1):
-                # sim(d,query) = Score
-                sim_matrix[i][j] = top_ss_tmp[j][4]
-                sim_matrix[j][i] = sim_matrix[i][j]
             else:
-                text_j_wordlist = replace_double_space(top_ss_tmp[j][2].replace('.', ' ').replace('/', ' ')).split(' ')
-                text_j_wordlist = remove_stopwords(text_j_wordlist, stopwords)
-                sim_matrix[i][j] = (calc_similarity_by_wordembedding(text_i_wordlist, text_i_wordlist, textual_IDF_voc,
-                                                                     word_embedding_model) +
-                                    calc_similarity_by_wordembedding(text_j_wordlist, text_i_wordlist, textual_IDF_voc,
-                                                                     word_embedding_model)) / 2.0
+                sim_matrix[i][j] = (calc_similarity(top_ss_tmp[i], top_ss_tmp[j], idf_voc, w2v_model) +
+                                    calc_similarity(top_ss_tmp[j], top_ss_tmp[i], idf_voc, w2v_model)) / 2.0
                 sim_matrix[j][i] = sim_matrix[i][j]
     return sim_matrix
 

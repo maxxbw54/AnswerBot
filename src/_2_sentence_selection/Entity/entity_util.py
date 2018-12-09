@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 import MySQLdb as mdb
 from utils.file_util import write_file
-from pathConfig import get_base_path
+import os
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+path_of_dic = os.path.join(dir_path, 'entity_dic.txt')
 
 
-def load_entity_dic():
-    path_of_dic = get_base_path() + 'entity_dic.txt'
-    dic = []
+def load_entity_set():
+    dic = set()
     for line in open(path_of_dic):
         line = line.strip()
-        dic.append(line)
+        dic.add(line)
     return dic
 
 

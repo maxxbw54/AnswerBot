@@ -55,6 +55,13 @@ def preprocessing_for_ans(ans):
     return ans
 
 
+def preprocessing_for_ans_sent(sent):
+    text = remove_text_code(sent.lower())
+    text = remove_html_tags(text)
+    text = replace_double_space(text.replace('\n', ' '))
+    return text.strip()
+
+
 def replace_double_space(text):
     while '  ' in text:
         text = text.replace('  ', ' ')

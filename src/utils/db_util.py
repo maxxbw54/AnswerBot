@@ -170,16 +170,15 @@ def ifjava_post(id):
 
 def read_correspond_answer_from_java_table(q_id):
     corr_answer = []
-    sql = "SELECT * FROM java WHERE PostTypeId = 2 AND ParentId = " + str(q_id)
+    sql = "SELECT * FROM java_ans WHERE PostTypeId = 2 AND ParentId = " + str(q_id)
     con = mdb.connect('localhost', 'root', 'root', 'answerbot')
     cur = con.cursor()
     try:
         cur.execute(sql)
         results = cur.fetchall()
         for row in results:
-            # id, type, score, desc
-            SO_AnswerUnit_tmp = SO_Ans(row[0], row[1], row[4], row[6])
-            SO_AnswerUnit_tmp = preprocessing_for_ans(SO_AnswerUnit_tmp)
+            # id, body, score, parent_id
+            SO_AnswerUnit_tmp = SO_Ans(row[0], row[6], row[4], row[17])
             corr_answer.append(SO_AnswerUnit_tmp)
     except Exception as e:
         print e

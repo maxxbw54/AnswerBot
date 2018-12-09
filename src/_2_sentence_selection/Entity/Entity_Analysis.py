@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-from _2_sentence_selection.Entity.entity_util import load_entity_dic
+from _2_sentence_selection.Entity.entity_util import load_entity_set
 
 
 def get_entity_score(query_entities, paragraph):
@@ -16,9 +16,8 @@ def get_entity_score(query_entities, paragraph):
 
 
 # (sentence text include entities)
-def get_entities_from_text(text):
-    entity_dic = load_entity_dic()
-    word_list = text.split(' ')
+def get_entities_from_word_list(word_list):
+    entity_dic = load_entity_set()
     entity_list = []
     for word in word_list:
         if word in entity_dic:
