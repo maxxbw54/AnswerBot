@@ -19,17 +19,17 @@ def load_ss_result(ss_fpath):
         ss_res.append((row[0], eval(row[1])))
     return ss_res
 
+if __name__ == '__main__':
+    ss_fpath = os.path.join(res_dir, 'ss_res.csv')
 
-ss_fpath = os.path.join(res_dir, 'ss_res.csv')
+    topk = 5
+    res = list()
+    for query, ss in load_ss_result(ss_fpath):
+        query = ' '.join(preprocessing_for_query(query))
+        sum = get_summary(query, ss, topk)
+        res.append([query, sum])
+        print("summary\n%s" % sum)
 
-topk = 5
-res = list()
-for query, ss in load_ss_result(ss_fpath):
-    query = ' '.join(preprocessing_for_query(query))
-    sum = get_summary(query, ss, topk)
-    res.append([query, sum])
-    print("summary\n%s" % sum)
-
-res_fpath = os.path.join(res_dir, 'summary_res.csv')
-header = ["query", "summary"]
-write_list_to_csv(res, res_fpath, header)
+    res_fpath = os.path.join(res_dir, 'summary_res.csv')
+    header = ["query", "summary"]
+    write_list_to_csv(res, res_fpath, header)

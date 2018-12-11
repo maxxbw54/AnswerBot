@@ -54,8 +54,7 @@ def calc_similarity(word_list_1, word_list_2, idf_voc, word2vector_model):
     return sim_up / sim_down
 
 
-def get_dq(query_w, topnum, repo):
-    global idf_vocab, w2v_model
+def get_dq(query_w, topnum, repo, idf_vocab, w2v_model):
     rank = []
     stopwords = read_EN_stopwords()
     cnt = 0
@@ -103,7 +102,7 @@ if __name__ == '__main__':
     for query in query_list:
         print("query : %s" % query)
         query_word = preprocessing_for_query(query)
-        top_dq = get_dq(query_word, topnum, repo)
+        top_dq = get_dq(query_word, topnum, repo, idf_vocab, w2v_model)
         cur_res_dict = []
         for i in range(len(top_dq)):
             q = top_dq[i][0]
