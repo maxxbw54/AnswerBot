@@ -1,4 +1,9 @@
+# -*- coding: UTF-8 -*-
 import os
+import sys
+
+root_path = "/home/hywang/answerbot-tool/src"
+sys.path.append(root_path)
 import time
 
 from _1_question_retrieval.get_dq import get_dq
@@ -45,6 +50,7 @@ if __name__ == '__main__':
     for query, top_dq_id_and_sim in dq_res:
         top_ss = get_ss(query, topnum, top_dq_id_and_sim)
         ss_res.append((query, top_ss))
+    # print ss_res
     print 'get summary...', time.strftime('%Y-%m-%d %H:%M:%S')
     res = list()
     for query, ss in ss_res:
