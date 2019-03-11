@@ -1,6 +1,9 @@
 # -*- coding: UTF-8 -*-
-
-from utils.db_util import read_correspond_answer_from_java_table
+import os
+import sys
+root_path = "/home/hywang/answerbot-tool/src"
+sys.path.append(root_path)
+from utils.db_util import read_correspond_answers_from_java_table
 from utils.str_util import split_into_paragraph
 import time
 import operator
@@ -13,12 +16,10 @@ import sys
 from utils.preprocessing_util import preprocessing_for_ans_sent
 from pathConfig import res_dir
 import os
-from utils.data_util import preprocessing_for_query
-from utils.StopWords import read_EN_stopwords
 from utils.csv_utils import write_list_to_csv
+from _2_sentence_selection.Entropy.build_tf_idf_dic import read_voc
 
-
-def get_ss(query, top_relevant_paragraph_num, top_dq_id_and_sim):
+def get_ss(query_word, top_relevant_paragraph_num, top_dq_id_and_sim, stopword):
     sent_list = []
     # Relevance
     max_Relevance = -sys.float_info.max
@@ -46,17 +47,21 @@ def get_ss(query, top_relevant_paragraph_num, top_dq_id_and_sim):
     min_Score = sys.float_info.max
 
     # For Entropy calculation : preprocessing for query
-    query_words = preprocessing_for_query(query)
+    query_words = query_word
     # query entities
     query_entities = get_entities_from_word_list(query_words)
-
     # load stopwords
-    stopwords = read_EN_stopwords()
-
+    stopwords = stopword
+    # load idf voc
+    idf_voc = read_voc()
     # question-level
+
+    answers_list = read_correspond_answers_from_java_table(top_dq_id_and_sim)
+
     for (q_id, sim) in top_dq_id_and_sim:
-        answers = read_correspond_answer_from_java_table(q_id)
+        #answers = read_correspond_answer_from_java_table(q_id)
         # answer-level
+        answers = answers_list[q_id]
         for answer_tmp in answers:
             answer_body = answer_tmp.body
             sentences = split_into_paragraph(answer_body)
@@ -91,10 +96,11 @@ def get_ss(query, top_relevant_paragraph_num, top_dq_id_and_sim):
                 max_HTMLTag = htmltag if max_HTMLTag < htmltag else max_HTMLTag
                 min_HTMLTag = htmltag if min_HTMLTag > htmltag else min_HTMLTag
                 # Entropy
-                entropy = get_entropy_score(query_words, clean_sent, stopwords)
+                entropy = get_entropy_score(query_words, clean_sent, stopwords, idf_voc)
                 max_Entropy = entropy if max_Entropy < entropy else max_Entropy
                 min_Entropy = entropy if min_Entropy > entropy else min_Entropy
                 sent_list.append([clean_sent, relevance, entity, a_score, order, pattern, htmltag, entropy, a_id, q_id])
+
 
     # Normalization from 1.0 -> 2.0 except Score
     Normalized_sent_list_tmp = []

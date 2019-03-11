@@ -1,3 +1,7 @@
+import os
+import sys
+root_path = "/home/hywang/answerbot-tool/src"
+sys.path.append(root_path)
 from _3_summarization.MMR_Analysis import MMR_Analysis
 from pathConfig import res_dir
 import os
@@ -19,11 +23,13 @@ def load_ss_result(ss_fpath):
         ss_res.append((row[0], eval(row[1])))
     return ss_res
 
+
 if __name__ == '__main__':
     ss_fpath = os.path.join(res_dir, 'ss_res.csv')
 
     topk = 5
     res = list()
+    # print load_ss_result(ss_fpath)
     for query, ss in load_ss_result(ss_fpath):
         query = ' '.join(preprocessing_for_query(query))
         sum = get_summary(query, ss, topk)

@@ -6,7 +6,7 @@ from build_tf_idf_dic import read_voc
 
 # remove the stopwords and query words from the sentence, then calculate the entropy of the rest.
 # calculate the meaning tf-idf of the rest word as the entropy
-def get_entropy_score(query_words, title_words, stopwords):
+def get_entropy_score(query_words, title_words, stopwords, idf_voc):
     # remove stopwords
     title_words = remove_stopwords(title_words, stopwords)
     # remove duplicate word in list
@@ -19,7 +19,8 @@ def get_entropy_score(query_words, title_words, stopwords):
     for word in query_words:
         if word in title_words:
             title_words.remove(word)
-    voc = read_voc()
+    # voc = read_voc()
+    voc = idf_voc
     entropy = 0.0
     for word in title_words:
         if word in voc.keys():

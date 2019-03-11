@@ -10,7 +10,7 @@ from utils.time_utils import get_current_time
 def read_questions_from_repo(num):
     sql = 'SELECT * FROM answerbot.repo WHERE PostTypeId=1 limit 0,' + str(num)
     SO_datalist = []
-    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
+    con = mdb.connect('localhost', 'root', '123456', 'answerbot')
     cur = con.cursor()
     try:
         cur.execute(sql)
@@ -31,7 +31,7 @@ def read_questions_from_repo(num):
 def read_all_questions_from_post():
     sql = 'SELECT * FROM posts where Tags like \'%<java>%\' and AnswerCount > 0'
     SO_datalist = []
-    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
+    con = mdb.connect('localhost', 'root', '123456', 'answerbot')
     cur = con.cursor()
     try:
         cur.execute(sql)
@@ -53,7 +53,7 @@ def read_all_questions_from_post():
 def read_all_questions_from_repo():
     sql = 'SELECT * FROM repo_qs'
     SO_datalist = []
-    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
+    con = mdb.connect('localhost', 'root', '123456', 'answerbot')
     cur = con.cursor()
     try:
         cur.execute(sql)
@@ -72,7 +72,7 @@ def read_all_questions_from_repo():
 
 
 def read_specific_question_from_repo(id):
-    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
+    con = mdb.connect('localhost', 'root', '123456', 'answerbot')
     cur = con.cursor()
     sql = "SELECT * FROM repo_qs WHERE Id=" + str(id)
     try:
@@ -89,7 +89,7 @@ def read_specific_question_from_repo(id):
 
 
 def read_specific_question_from_post(id):
-    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
+    con = mdb.connect('localhost', 'root', '123456', 'answerbot')
     cur = con.cursor()
     sql = "SELECT * FROM posts WHERE Id=" + str(id)
     try:
@@ -106,7 +106,7 @@ def read_specific_question_from_post(id):
 
 
 def read_specific_question_from_post(id):
-    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
+    con = mdb.connect('localhost', 'root', '123456', 'answerbot')
     cur = con.cursor()
     sql = "SELECT * FROM posts WHERE Id=" + str(id)
     try:
@@ -126,7 +126,7 @@ def read_specific_question_from_post(id):
 def read_duplicate_pair_from_postlink_table(num):
     Duplicate_pair = []
     postlink_sql = "SELECT * FROM post_links ORDER BY PostId"
-    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
+    con = mdb.connect('localhost', 'root', '123456', 'answerbot')
     cur = con.cursor()
     try:
         cur.execute(postlink_sql)
@@ -152,7 +152,7 @@ def read_duplicate_pair_from_postlink_table(num):
 
 
 def ifjava_post(id):
-    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
+    con = mdb.connect('localhost', 'root', '123456', 'answerbot')
     cur = con.cursor()
     sql = "SELECT * FROM posts WHERE Id=" + str(id) + " and Tags like '%<java>%'"
     ifjava = False
@@ -167,11 +167,32 @@ def ifjava_post(id):
     con.close()
     return ifjava
 
+def read_correspond_answers_from_java_table(top_dq_id_and_sim):
+    corr_answers = {}
+    con = mdb.connect('localhost', 'root', '123456', 'answerbot')
+    cur = con.cursor()
+    try:
+        for (q_id, sim) in top_dq_id_and_sim:
+            corr_answer = []
+            sql = "SELECT * FROM java_ans WHERE PostTypeId = 2 AND ParentId = " + str(q_id)
+            cur.execute(sql)
+            results = cur.fetchall()
+            for row in results:
+                # id, body, score, parent_id
+                SO_AnswerUnit_tmp = SO_Ans(row[0], row[6], row[4], row[17])
+                corr_answer.append(SO_AnswerUnit_tmp)
+            corr_answers[q_id] = corr_answer
+    except Exception as e:
+        print e
+    cur.close()
+    con.close()
+    return corr_answers
+
 
 def read_correspond_answer_from_java_table(q_id):
     corr_answer = []
     sql = "SELECT * FROM java_ans WHERE PostTypeId = 2 AND ParentId = " + str(q_id)
-    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
+    con = mdb.connect('localhost', 'root', '123456', 'answerbot')
     cur = con.cursor()
     try:
         cur.execute(sql)
@@ -189,7 +210,7 @@ def read_correspond_answer_from_java_table(q_id):
 
 def read_q_list_from_java(id_list):
     qlist = []
-    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
+    con = mdb.connect('localhost', 'root', '123456', 'answerbot')
     cur = con.cursor()
     count = 1
     for qid in id_list:
@@ -212,7 +233,7 @@ def read_q_list_from_java(id_list):
 
 def read_id_list(tablename):
     id_list = []
-    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
+    con = mdb.connect('localhost', 'root', '123456', 'answerbot')
     cur = con.cursor()
     count = 1
     for id in id_list:
@@ -236,7 +257,7 @@ def read_id_list(tablename):
 # repo
 def insert_qlist_to_table(qlist, tablename):
     print "start to insert...", get_current_time()
-    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
+    con = mdb.connect('localhost', 'root', '123456', 'answerbot')
     cur = con.cursor()
     count = 1
     for q in qlist:

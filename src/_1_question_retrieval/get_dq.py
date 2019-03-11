@@ -1,15 +1,51 @@
 # -*- coding: utf-8 -*-
+import os
+import sys
+root_path = "/home/hywang/answerbot-tool/src"
+sys.path.append(root_path)
 import operator
 import time
 from utils.StopWords import remove_stopwords, read_EN_stopwords
 from utils.db_util import read_all_questions_from_repo, read_specific_question_from_repo
 import numpy as np
-from utils.data_util import load_idf_vocab, load_w2v_model
-from utils.csv_utils import write_list_to_csv
-from utils.data_util import preprocessing_for_query
-from pathConfig import res_dir
-import os
 
+def init_doc_matrix(doc,w2v):
+
+    matrix = np.zeros((len(doc),200)) #word embedding size is 100
+    for i, word in enumerate(doc):
+        if word in w2v.wv.vocab:
+            matrix[i] = np.array(w2v.wv[word])
+
+    #l2 normalize
+    try:
+        norm = np.linalg.norm(matrix, axis=1).reshape(len(doc), 1)
+        matrix = np.divide(matrix, norm, out=np.zeros_like(matrix), where=norm!=0)
+        #matrix = matrix / np.linalg.norm(matrix, axis=1).reshape(len(doc), 1)
+    except RuntimeWarning:
+        print doc
+
+    #matrix = np.array(preprocessing.normalize(matrix, norm='l2'))
+
+    return matrix
+
+def init_doc_idf_vector(doc,idf):
+    idf_vector = np.zeros((1,len(doc)))  # word embedding size is 200
+    for i, word in enumerate(doc):
+        if word in idf:
+            idf_vector[0][i] = idf[word]
+
+    return idf_vector
+
+
+def sim_doc_pair(matrix1,matrix2,idf1,idf2):
+
+    sim12 = (idf1*(matrix1.dot(matrix2.T).max(axis=1))).sum() / idf1.sum()
+
+    sim21 = (idf2*(matrix2.dot(matrix1.T).max(axis=1))).sum() / idf2.sum()
+
+    return (sim12 + sim21) / 2.0
+    # total_len = matrix1.shape[0] + matrix2.shape[0]
+    # return sim12 * matrix2.shape[0] / total_len + sim21 * matrix1.shape[0] / total_len
 
 def calc_wordvec_similarity(vec1, vec2):
     vec1 = vec1.reshape(1, len(vec1))
@@ -54,19 +90,21 @@ def calc_similarity(word_list_1, word_list_2, idf_voc, word2vector_model):
     return sim_up / sim_down
 
 
-def get_dq(query_w, topnum, repo, idf_vocab, w2v_model):
+def get_dq(query_w, topnum, questions, query_idf, query_matrix):
     rank = []
-    stopwords = read_EN_stopwords()
+    #stopwords = read_EN_stopwords()
     cnt = 0
-    for q in repo:
-        title_w = remove_stopwords(q.title, stopwords)
-        sim = calc_similarity(query_w, title_w, idf_vocab, w2v_model)
-        sim += calc_similarity(title_w, query_w, idf_vocab, w2v_model)
-        sim /= 2.0
-        rank.append([q.id, sim])
+    for question in questions:
+        #title_w = remove_stopwords(q.title, stopwords)
+        #sim = calc_similarity(query_w, repo_idtitle[key], query_idf, query_matrix)
+        #sim += calc_similarity(repo_idtitle[key], query_w, query_idf, query_matrix)
+        # sim /= 2.0
+
+        sim = sim_doc_pair(query_matrix,question.matrix, query_idf, question.idf_vector)
+        rank.append([question.id, sim])
         cnt += 1
         if cnt % 10000 == 0:
-            print("Processed %s questions." % cnt)
+            print("Processed %s questions...%s" % (cnt, time.strftime('%Y-%m-%d %H:%M:%S')))
 
     # format: [id,sim]
     rank.sort(key=operator.itemgetter(1), reverse=True)
@@ -77,40 +115,7 @@ def get_dq(query_w, topnum, repo, idf_vocab, w2v_model):
         sim = rank[i][1]
         rank.append(id)
         if i < topnum:
-            q = read_specific_question_from_repo(id)
-            top_dq.append((q, sim))
+            qs = read_specific_question_from_repo(id)
+            top_dq.append((qs, sim))
     return top_dq
 
-
-if __name__ == '__main__':
-
-    # settings
-    topnum = 10
-    idf_vocab_fpath = './_3_IDF_vocabulary/idf_vocab.csv'
-
-    # load word2vec model
-    print 'load_textual_word2vec_model() : ', time.strftime('%Y-%m-%d %H:%M:%S')
-    w2v_model = load_w2v_model()
-    # load repo
-    print 'load repo :', time.strftime('%Y-%m-%d %H:%M:%S')
-    repo = read_all_questions_from_repo()
-    print 'load textual voc : ', time.strftime('%Y-%m-%d %H:%M:%S')
-    idf_vocab = load_idf_vocab()
-
-    query_list = ["Differences between HashMap and Hashtable?"]
-    res = list()
-    for query in query_list:
-        print("query : %s" % query)
-        query_word = preprocessing_for_query(query)
-        top_dq = get_dq(query_word, topnum, repo, idf_vocab, w2v_model)
-        cur_res_dict = []
-        for i in range(len(top_dq)):
-            q = top_dq[i][0]
-            sim = top_dq[i][1]
-            print "#%s\nId : %s\nTitle : %s\nSimilarity : %s\n" % (i, q.id, q.title, sim)
-            cur_res_dict.append((q.id, round(sim, 2)))
-        res.append([query, cur_res_dict])
-
-    res_fpath = os.path.join(res_dir, 'rq_res.csv')
-    header = ["query", "rq_id_list"]
-    write_list_to_csv(res, res_fpath, header)

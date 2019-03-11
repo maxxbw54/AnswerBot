@@ -85,6 +85,7 @@ CREATE TABLE java_ans (
 
 # index
 create index java_ans_idx on java_ans(Id);
+ALTER TABLE java_ans ADD INDEX pid2(PostTypeId, ParentId);
 ```
 
 2. Insert data

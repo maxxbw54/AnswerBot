@@ -1,3 +1,7 @@
+import os
+import sys
+root_path = "/home/hywang/answerbot-tool/src"
+sys.path.append(root_path)
 from gensim.models.word2vec import Word2Vec, LineSentence
 from utils.time_utils import get_current_time
 

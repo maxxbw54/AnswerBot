@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+import os
+import sys
+root_path = "/home/hywang/answerbot-tool/src"
+sys.path.append(root_path)
 from utils.db_util import read_all_questions_from_repo
 import math
 from utils.time_utils import get_current_time
@@ -40,6 +44,9 @@ def build_IDF_vocabulary():
         voc[key] = idf
     sorted_voc = sorted(voc.items(), key=operator.itemgetter(1))
     return sorted_voc
+
+
+
 
 
 if __name__ == '__main__':

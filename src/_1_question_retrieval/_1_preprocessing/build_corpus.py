@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-
+import os
+import sys
+root_path = "/home/hywang/answerbot-tool/src"
+sys.path.append(root_path)
 from data_structure.SO_que import SO_Que
 import pymysql as mdb
 from utils.preprocessing_util import preprocessing_for_que
@@ -11,7 +14,7 @@ sys.setdefaultencoding('utf8')
 
 def read_questions_from_java():
     sql = 'SELECT * FROM answerbot.java_qs;'
-    con = mdb.connect('localhost', 'root', 'root', 'answerbot')
+    con = mdb.connect('localhost', 'root', '123456', 'answerbot')
     cur = con.cursor()
     qlist = []
     cur.execute(sql)
